@@ -1,6 +1,6 @@
 package com.slamgarden;
 
-import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.*;
 
 import java.io.File;
 import java.io.IOException;
