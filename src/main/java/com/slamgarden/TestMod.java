@@ -22,7 +22,17 @@ public class TestMod
         logger.info( "In method Main()");
         logger.debug("This is debug in TestMod()");
 
-        HttpLine httpline = new HttpLine(args[0]);
+        HttpLine httpline;
+  
+        if (args.length > 0 ) {
+          httpline = new HttpLine(args[0]);
+        } else {
+          httpline = new HttpLine();
+        }
+        int i = 0;
+        while(httpline.next() ) {
+          logger.debug("reading next line number " + i++ + ": " + httpline.getLine());
+        }
 
         System.out.println("End of TestMod");
     }

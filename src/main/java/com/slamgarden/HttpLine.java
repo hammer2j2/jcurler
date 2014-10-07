@@ -29,7 +29,7 @@ public class HttpLine {
         System.out.println("hello fair world");
     }
 
-    private String line;
+    private String curline;
     private boolean proxy;
     private String[] header = new String[20];
     private boolean reuse;   /* caller should call with the returned and saved settings */
@@ -44,6 +44,7 @@ public class HttpLine {
      * @param filename
      * @returns new HttpLine object
      */
+    public HttpLine() {}
     public HttpLine(String filename) {
 
         file = new File(filename);
@@ -67,6 +68,24 @@ public class HttpLine {
         }
     }
 
+    public boolean next() {
+        logger.debug("In next()");
+        try {
+            curline = reader.readLine();
+            if ( curline == null ) {
+              return false;
+            }
+            return true;
+        } catch ( IOException e ) {
+            logger.error("Read to end of file or other IO error: "+filename);
+            return false;
+        }
+    }
+
+    public String getLine() {
+      return curline;
+    }
+
     /**
      *   Promotes the line instance variable to the next line in the file if successful
      *   by reading the line.
@@ -74,16 +93,6 @@ public class HttpLine {
      * @param <None>
      * @returns true of false based on success
      */
-    public boolean next() {
-        logger.debug("In next()");
-        try {
-            reader.readLine();
-            return true;
-        } catch ( IOException e ) {
-            logger.error("Read to end of file or other IO error: "+filename);
-            return false;
-        }
-    }
 
     /**
      *  Examines the current command file line ( following a call to nextLine ).
