@@ -31,7 +31,7 @@ public class TestMod
         }
         int i = 0;
         while(httpline.next() ) {
-          logger.debug("reading next line number " + i++ + ": " + httpline.getLine());
+          logger.debug("reading next line number " + i++ + ": " + httpline.getLineAsText());
         }
 
         System.out.println("End of TestMod");

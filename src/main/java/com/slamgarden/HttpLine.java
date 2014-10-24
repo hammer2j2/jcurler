@@ -14,7 +14,7 @@ import java.io.*;
  * HttpLine will indicate if the caller should retain state for a
  *   subsequent call, based on the -reuse parameter in the line.
  * Ideally, HttpLine will return an object which contains a type
- *   of Http object which can be easily copied by the caller
+ *   of object which can be easily copied by the caller
  *   into it's own Http object.
  *
  */
@@ -45,6 +45,7 @@ public class HttpLine {
      * @returns new HttpLine object
      */
     public HttpLine() {}
+
     public HttpLine(String filename) {
 
         file = new File(filename);
@@ -73,7 +74,7 @@ public class HttpLine {
         try {
             curline = reader.readLine();
             if ( curline == null ) {
-              return false;
+              throw new IOException("End of file");
             }
             return true;
         } catch ( IOException e ) {
@@ -83,8 +84,14 @@ public class HttpLine {
     }
 
     public String getLine() {
+      return getLineAsText();
+    }
+
+    public String getLineAsText() {
       return curline;
     }
+
+
 
     /**
      *   Promotes the line instance variable to the next line in the file if successful
@@ -145,32 +152,44 @@ httppost.setEntity(entity);
 /*
 
 List<NameValuePair> formparams = new ArrayList<NameValuePair>();
+
 formparams.add(new BasicNameValuePair("param1", "value1"));
 formparams.add(new BasicNameValuePair("param2", "value2"));
+
 UrlEncodedFormEntity entity = new UrlEncodedFormEntity(formparams, Consts.UTF_8);
+
 HttpPost httppost = new HttpPost("http://localhost/handler.do");
+
 httppost.setEntity(entity);
 
 */
 
 /*
-In the following example the request configuration set by the initial request will be kept in the execution
-context and get propagated to the consecutive requests sharing the same context.
+In the following example the request configuration set by the initial request will be kept in the execution context and get propagated to the consecutive requests sharing the same context.
+
 CloseableHttpClient httpclient = HttpClients.createDefault();
+
 RequestConfig requestConfig = RequestConfig.custom()
  .setSocketTimeout(1000)
  .setConnectTimeout(1000)
  .build();
+
 HttpGet httpget1 = new HttpGet("http://localhost/1");
+
 httpget1.setConfig(requestConfig);
+
 CloseableHttpResponse response1 = httpclient.execute(httpget1, context);
+
 try {
  HttpEntity entity1 = response1.getEntity();
 } finally {
  response1.close();
 }
+
 HttpGet httpget2 = new HttpGet("http://localhost/2");
+
 CloseableHttpResponse response2 = httpclient.execute(httpget2, context);
+
 try {
  HttpEntity entity2 = response2.getEntity();
 } finally {
