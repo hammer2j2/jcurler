@@ -69,6 +69,14 @@ public class HttpLine {
         }
     }
 
+    /**
+     * Checks to see if there is another jcurler rule in the command file by
+     * attempting to read the next line.  If it fails, returns false. If it
+     * succeeds, curline is populated with the line which subsequent calls to
+     * getLine and other methods will for use in methods.
+     * <p>
+     * @returns true or false 
+     */
     public boolean next() {
         logger.debug("In next()");
         try {
@@ -83,10 +91,22 @@ public class HttpLine {
         }
     }
 
+    /**
+     * returns the current value of curline as read from the command file in a prior
+     * call to next().
+     * <p>
+     * @returns String
+     */
     public String getLine() {
       return getLineAsText();
     }
 
+    /**
+     * returns the current value of curline as read from the command file in a prior
+     * call to next().
+     * <p>
+     * @returns String
+     */
     public String getLineAsText() {
       return curline;
     }

@@ -4,23 +4,27 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.lang.Exception;
+
+
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.codec.binary.*;
 
-//import org.apache.http.impl.conn.BasicHttpClientConnectionManager
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 
 import org.apache.http.*;
 import org.apache.http.impl.conn.*;
 import org.apache.http.conn.*;
 import org.apache.http.conn.routing.*;
 import org.apache.http.HttpHost;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.protocol.HttpCoreContext;
 
 
 import org.apache.log4j.Logger;
 
-// import com.slamgarden.HttpLine;
+import com.slamgarden.HttpLine;
 
 /** Description of TestConn()
  *
