@@ -36,6 +36,7 @@ public class HttpLine {
     private File file;
     private BufferedReader reader = null;
     private String filename;
+    private String hostname;
 
     /**
      * Constructor for HttpLine object.
@@ -131,8 +132,13 @@ public class HttpLine {
      */
     void parse() {
         logger.debug("In parse()");
-    }
+        hostname = "www.slamgarden.com";
 
+    }
+    public String getHostname() {
+      parse();
+      return(hostname);
+    }
 }
 
 /*

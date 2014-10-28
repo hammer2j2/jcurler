@@ -20,6 +20,8 @@ import org.apache.http.HttpHost;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.protocol.HttpCoreContext;
+import org.apache.http.protocol.HttpRequestExecutor;
+import org.apache.http.client.methods.HttpGet;
 
 
 import org.apache.log4j.Logger;
@@ -35,15 +37,20 @@ import com.slamgarden.HttpLine;
 
 public class TestConn
 {
-    ConnectionRequest connRequest;
+    static ConnectionRequest connRequest;
+    static HttpLine httpline;
+    static HttpRequestExecutor exeRequest;
+    static HttpGet get;
+    static BasicHttpClientConnectionManager connManager;
+    static HttpClientContext context;
+    static HttpRoute route;
+    static HttpClientConnection conn;
 
     private static Logger logger = Logger.getLogger(TestConn.class);
 
-    public static void main(String args[]) throws IOException, InterruptedException, ConnectionPoolTimeoutException, ExecutionException {
+    public static void main(String args[]) throws IOException, InterruptedException, ConnectionPoolTimeoutException, ExecutionException, HttpException {
         logger.info( "In method Main()");
         logger.debug("This is debug in TestConn()");
-
-        HttpLine httpline;
 
         TestConn testconn = new TestConn();
 
@@ -57,22 +64,68 @@ public class TestConn
         int i = 0;
         while(httpline.next() ) {
           logger.debug("reading next line number " + i++ + ": " + httpline.getLine());
+          initReq(httpline.getHostname());
+          exeRequest.execute(get, conn, context);
         }
 
         System.out.println("End of TestConn");
     }
+    
+    static void initReq(String hostname) {
 
+        exeRequest = new HttpRequestExecutor();
+
+        context.setTargetHost((new HttpHost(hostname, 80)));
+
+        get = new HttpGet("http://" + hostname);
+
+ 
+    }
+ 
+/*
+// high level
+CloseableHttpClient client = HttpClients.custom().setConnectionManager(basicConnManager).build();
+client.execute(get);
+
+*/
+
+/* Setting headers
+// for one request
+
+HttpClient client = HttpClients.custom().build();
+HttpUriRequest request = RequestBuilder.get().setUri(SAMPLE_URL)
+  .setHeader(HttpHeaders.CONTENT_TYPE, "application/json").build();
+client.execute(request);
+
+*/
+
+/* Setting headers
+// on all requests by default
+
+Header header = new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+List<Header> headers = Lists.newArrayList(header);
+HttpClient client = HttpClients.custom().setDefaultHeaders(headers).build();
+HttpUriRequest request = RequestBuilder.get().setUri(SAMPLE_URL).build();
+client.execute(request);
+
+*/
+
+/** Description of initConn()
+ *
+ * initConn() 
+ * @throws          IOException, ConnectionPoolTimeoutEx    ception, InterruptedException, ExecutionException 
+ */
     public void initConn(String proto, String domain, int port) throws IOException, ConnectionPoolTimeoutException, InterruptedException, ExecutionException {
 
-      BasicHttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
+      connManager = new BasicHttpClientConnectionManager();
 
-      HttpClientContext context = HttpClientContext.create();
+      context = HttpClientContext.create();
 
-      HttpRoute route = new HttpRoute(new HttpHost(domain, port));
+      route = new HttpRoute(new HttpHost(domain, port));
 
-      ConnectionRequest connRequest = connManager.requestConnection(route, null);
+      connRequest = connManager.requestConnection(route, null);
 
-      HttpClientConnection conn = connRequest.get(2,TimeUnit.SECONDS);
+      conn = connRequest.get(2,TimeUnit.SECONDS);
       try {
         // If not open
         if (!conn.isOpen()) {
@@ -82,8 +135,9 @@ public class TestConn
         connManager.routeComplete(conn, route, context);
         }
         // Do useful things with the connection.
-      } finally {
-        connManager.releaseConnection(conn, null, 1, TimeUnit.MINUTES);
+      }
+      catch ( ConnectionPoolTimeoutException e) {
+        logger.error(e);
       }
     }
 
