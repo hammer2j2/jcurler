@@ -85,11 +85,12 @@ public class HttpLine {
             if ( curline == null ) {
               throw new IOException("End of file");
             }
+            parse();
             return true;
         } catch ( IOException e ) {
             logger.error("Read to end of file or other IO error: "+filename);
             return false;
-        }
+        } 
     }
 
     /**
@@ -139,7 +140,6 @@ public class HttpLine {
         hostname=a[1];
     }
     public String getHostname() {
-      parse();
       return(hostname);
     }
 }
