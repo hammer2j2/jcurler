@@ -52,10 +52,9 @@ public class TestConn
         logger.info( "In method Main()");
         logger.debug("This is debug in TestConn()");
 
-        TestConn testconn = new TestConn();
+        String curHost = null;
+        String lastHost = "";
 
-        testconn.initConn("http","www.slamgarden.com",80);
-  
         if (args.length > 0 ) {
           httpline = new HttpLine(args[0]);
         } else {
@@ -64,8 +63,14 @@ public class TestConn
         int i = 0;
         while(httpline.next() ) {
           logger.debug("reading next line number " + i++ + ": " + httpline.getLine());
+          curHost = httpline.getHostname();
+          if(!curHost.equals(lastHost)) { // changed destination
+            closeConn();
+            openConn("http",curHost,80);
+          }
           initReq(httpline.getHostname());
           exeRequest.execute(get, conn, context);
+          lastHost = httpline.getHostname();
         }
 
         System.out.println("End of TestConn");
@@ -110,12 +115,12 @@ client.execute(request);
 
 */
 
-/** Description of initConn()
+/** Description of openConn()
  *
- * initConn() 
+ * openConn() 
  * @throws          IOException, ConnectionPoolTimeoutEx    ception, InterruptedException, ExecutionException 
  */
-    public void initConn(String proto, String domain, int port) throws IOException, ConnectionPoolTimeoutException, InterruptedException, ExecutionException {
+    static public void openConn(String proto, String domain, int port) throws IOException, ConnectionPoolTimeoutException, InterruptedException, ExecutionException {
 
       connManager = new BasicHttpClientConnectionManager();
 
@@ -141,12 +146,20 @@ client.execute(request);
       }
     }
 
-    public ConnectionRequest getConn() {
+    static ConnectionRequest getConn() {
       return connRequest;
     }
 
-    public void setConnProps() {
+    static void setConnProps() {
       logger.debug("in setConnProps, probably need to make specific property setters");
+    }
+
+    static void closeConn() {
+        try {
+          connManager.releaseConnection(conn, null, 1, TimeUnit.MINUTES);
+        } catch (NullPointerException e) {
+          logger.warn(e + "connManager has no connection to close.");
+        }
     }
 
 }

@@ -132,8 +132,11 @@ public class HttpLine {
      */
     void parse() {
         logger.debug("In parse()");
-        hostname = "www.slamgarden.com";
-
+        String[] a = curline.split("\\s+",0);
+        String url = a[0];
+        logger.debug("In parse() url = " +url);
+        a  = url.split("://",0);
+        hostname=a[1];
     }
     public String getHostname() {
       parse();
