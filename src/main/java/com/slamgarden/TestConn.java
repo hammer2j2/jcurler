@@ -18,6 +18,7 @@ import org.apache.http.conn.*;
 import org.apache.http.conn.routing.*;
 import org.apache.http.HttpHost;
 import org.apache.http.protocol.HttpContext;
+// see http://hc.apache.org/httpcomponents-client-ga/httpclient/apidocs/org/apache/http/client/protocol/package-summary.html
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.protocol.HttpRequestExecutor;
@@ -61,28 +62,47 @@ public class TestConn
           httpline = new HttpLine();
         }
         int i = 0;
+
         while(httpline.next() ) {
           logger.debug("reading next line number " + i++ + ": " + httpline.getLine());
+
           curHost = httpline.getHostname();
+
           if(!curHost.equals(lastHost)) { // changed destination
             closeConn();
-            openConn("http",curHost,80);
+            try {
+              openConn(httpline.getProto(),curHost,httpline.getPort());
+              initReq(httpline.getHostname(),httpline.getPort(),httpline.getProto(),httpline.getUriPath());
+              exeRequest.execute(get, conn, context);
+              lastHost = httpline.getHostname();
+            } 
+            catch ( Exception e) {
+              logger.error("Bad connection!" + e);
+              lastHost = "FailedHost Connect";  // fail the lasthost comparison
+            }
+          } 
+          else {
+            initReq(httpline.getHostname(),httpline.getPort(),httpline.getProto(),httpline.getUriPath());
+            exeRequest.execute(get, conn, context);
+            lastHost = httpline.getHostname();
           }
-          initReq(httpline.getHostname());
-          exeRequest.execute(get, conn, context);
-          lastHost = httpline.getHostname();
         }
 
         System.out.println("End of TestConn");
     }
     
-    static void initReq(String hostname) {
+/* Init Req */
+
+    static void initReq(String hostname, Integer port, String proto, String uriPath) {
 
         exeRequest = new HttpRequestExecutor();
 
-        context.setTargetHost((new HttpHost(hostname, 80)));
+// what is the purpose of setTargetHost in the context when calling HttpGet() right after??
 
-        get = new HttpGet("http://" + hostname);
+        // context.setTargetHost((new HttpHost(hostname, port))); // this seems not to work
+
+        get = new HttpGet(proto +"://" + hostname+uriPath);
+        // get = new HttpGet(uriPath);
 
  
     }

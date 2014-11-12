@@ -3,6 +3,8 @@ package com.slamgarden;
 import org.apache.log4j.Logger;
 
 import java.io.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /** Description of HttpLine()
  * reads a line from a url test file
@@ -37,6 +39,9 @@ public class HttpLine {
     private BufferedReader reader = null;
     private String filename;
     private String hostname;
+    private String proto;
+    private String uriPath;
+    private Integer port;
 
     /**
      * Constructor for HttpLine object.
@@ -133,14 +138,62 @@ public class HttpLine {
      */
     void parse() {
         logger.debug("In parse()");
-        String[] a = curline.split("\\s+",0);
-        String url = a[0];
-        logger.debug("In parse() url = " +url);
-        a  = url.split("://",0);
-        hostname=a[1];
+        Pattern pattern = Pattern.compile("(htt\\w{1,2})://([\\w\\.]+)(:\\d+|)(.*?)(\\s+.*|$)");
+        Matcher matcher = pattern.matcher(curline);
+
+        if(matcher.find()) {
+          logger.debug("In parse() matcher.find() is true");
+          for(int i = 1;i<5;i++) {
+            logger.debug(String.format("In parse() matcher.start(%d) is %d",i,matcher.start(i)));
+            logger.debug(String.format("In parse() matcher.end(%d) is %d",i,matcher.end(i)));
+            logger.debug(String.format("In parse() matcher.group(%d) is %s",i,matcher.group(i)));
+          }
+
+          proto=matcher.group(1);
+
+          if ( matcher.start(3) == matcher.end(3)) {
+            if( proto.equals("http")) {
+              port = 80;
+            }
+            else if ( proto.equals("https")) {
+              port = 443;
+            }
+            else { 
+              logger.error("Uncaught error proto ! http or https");
+            }
+          }
+          else {
+            port = Integer.parseInt(matcher.group(3).substring(1));
+          }
+
+          logger.debug("In parse() port = " + port);
+
+          hostname=matcher.group(2);
+
+          if(matcher.start(4) == matcher.end(4)) {
+            uriPath="/";
+          }
+          else {
+            uriPath=matcher.group(4);
+          }
+          logger.debug("In parse() uriPath = " + uriPath);
+
+        } 
+        else {
+          logger.debug("In parse() matcher.find() is false");
+        }
     }
     public String getHostname() {
       return(hostname);
+    }
+    public String getProto() {
+      return(proto);
+    }
+    public Integer getPort() {
+      return(port);
+    }
+    public String getUriPath() {
+      return(uriPath);
     }
 }
 
