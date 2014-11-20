@@ -1,0 +1,6 @@
+http://www.slamgarden.com -H "Host:vanity.com" -resp=200,400 -scrape=hoohaa -data=eenie meanie miny moe
+http://example.com
+http://example.com
+http://www.slamgarden.com:8888/test.txt
+
+http://google.com
